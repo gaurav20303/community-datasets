@@ -15,9 +15,60 @@ def get_datasets(pages, page_size):
             data_json = json.loads(response)
 
             for hit in data_json['response']['results']['result']:
-                # print(hit['metadata']['oaf:entity']['oaf:result']['description']['$'])
+                # print(result['description']['$'])
                 # break
+                result = hit['metadata']['oaf:entity']['oaf:result']
+                # IN USE
+                title = ''
+                if 'title' in result:
+                    if isinstance(result['title'], list):
+                        for val in result['title']:
+                            title += val['$']
+                            title += ' | '
+                        title = doi.rstrip(' | ')
+                    else:
+                        title = result['title']['$']
 
+                abstract = ''
+                if 'description' in result:
+                    if isinstance(result['description'], list):
+                        for val in result['description']:
+                            abstract += val['$']
+                            abstract += ' | '
+                        abstract = abstract.rstrip(' | ')
+                    else:
+                        abstract = result['description']['$']
+
+                publisher = ''
+                if 'publisher' in result:
+                    publisher = result['publisher']['$']
+
+                date_of_acceptance = ''
+                if 'dateofacceptance' in result:
+                    date_of_acceptance = result['dateofacceptance']['$']
+
+                collected_from = ''
+                if 'collectedfrom' in result:
+                    if isinstance(result['collectedfrom'], list):
+                        for val in result['collectedfrom']:
+                            collected_from += val['@name']
+                            collected_from += ' | '
+                        collected_from = collected_from.rstrip(' | ')
+                    else:
+                        collected_from = result['collectedfrom']['@name']
+
+                doi = ''
+                if 'pid' in result:
+                    if isinstance(result['pid'], list):
+                        for val in result['pid']:
+                            doi += val['$']
+                            doi += ' | '
+                        doi = doi.rstrip(' | ')
+                    else:
+                        doi = result['pid']['$']
+                        
+                        
+                # NOT IN USE
                 date_of_collection = hit['header']['dri:dateOfCollection']['$']
                 # print(date_of_collection)
                 if 'Z' in date_of_collection:
@@ -40,54 +91,31 @@ def get_datasets(pages, page_size):
                     date_of_transformation = datetime.datetime.fromisoformat(date_of_transformation)
                     date_of_transformation = date_of_transformation.strftime('%Y-%m-%d %H:%M:%S')
 
-                if isinstance(hit['metadata']['oaf:entity']['oaf:result']['collectedfrom'], list):
-                    collected_from = hit['metadata']['oaf:entity']['oaf:result']['collectedfrom'][0]['@name']
-                else:
-                    collected_from = hit['metadata']['oaf:entity']['oaf:result']['collectedfrom']['@name']
-
                 original_id = ''
-                if isinstance(hit['metadata']['oaf:entity']['oaf:result']['originalId'], list):
-                    original_id = hit['metadata']['oaf:entity']['oaf:result']['originalId'][0]['$']
+                if isinstance(result['originalId'], list):
+                    original_id = result['originalId'][0]['$']
                 else:
-                    original_id = hit['metadata']['oaf:entity']['oaf:result']['originalId']['$']
+                    original_id = result['originalId']['$']
 
-                p_id = ''
-                if 'pid' in hit['metadata']['oaf:entity']['oaf:result']:
-                    if isinstance(hit['metadata']['oaf:entity']['oaf:result']['pid'], list):
-                        p_id = hit['metadata']['oaf:entity']['oaf:result']['pid'][0]['$']
-                    else:
-                        p_id = hit['metadata']['oaf:entity']['oaf:result']['pid']['$']
+                best_access_right = result['bestaccessright']['@classid']
 
-                if isinstance(hit['metadata']['oaf:entity']['oaf:result']['title'], list):
-                    title = hit['metadata']['oaf:entity']['oaf:result']['title'][0]['$']
-                else:
-                    title = hit['metadata']['oaf:entity']['oaf:result']['title']['$']
-
-                best_access_right = hit['metadata']['oaf:entity']['oaf:result']['bestaccessright']['@classid']
-
-                date_of_acceptance = hit['metadata']['oaf:entity']['oaf:result']['dateofacceptance']['$']
 
                 keywords = ''
-                if 'subject' in hit['metadata']['oaf:entity']['oaf:result']:
-                    if isinstance(hit['metadata']['oaf:entity']['oaf:result']['subject'], list):
-                        for keyword in hit['metadata']['oaf:entity']['oaf:result']['subject']:
+                if 'subject' in result:
+                    if isinstance(result['subject'], list):
+                        for keyword in result['subject']:
                             keywords += keyword['$']
                             keywords += ','
                         keywords = keywords.rstrip(',')
                     else:
-                        keywords = hit['metadata']['oaf:entity']['oaf:result']['subject']['$']
+                        keywords = result['subject']['$']
 
-                language = hit['metadata']['oaf:entity']['oaf:result']['language']['@classname']
+                language = result['language']['@classname']
 
-                if 'publisher' in hit['metadata']['oaf:entity']['oaf:result']:
-                    publisher = hit['metadata']['oaf:entity']['oaf:result']['publisher']['$']
-                else:
-                    publisher = ''
+                result_type = result['resulttype']['@classname']
+                resource_type = result['resourcetype']['@classname']
 
-                result_type = hit['metadata']['oaf:entity']['oaf:result']['resulttype']['@classname']
-                resource_type = hit['metadata']['oaf:entity']['oaf:result']['resourcetype']['@classname']
-
-                # context = hit['metadata']['oaf:entity']['oaf:result']['context']['@type']
+                # context = result['context']['@type']
 
                 # linked_collected_from = ''
                 # linked_publisher = ''
@@ -95,8 +123,8 @@ def get_datasets(pages, page_size):
                 # linked_title = ''
                 # linked_pid = ''
                 #
-                # if 'result' in hit['metadata']['oaf:entity']['oaf:result']['children']:
-                #     for child in hit['metadata']['oaf:entity']['oaf:result']['children']['result']:
+                # if 'result' in result['children']:
+                #     for child in result['children']['result']:
                 #         linked_collected_from += child['collectedfrom'] + '|'
                 #         linked_publisher += child['publisher'] + '|'
                 #         linked_doa += child['dateofacceptance'] + '|'
@@ -108,21 +136,14 @@ def get_datasets(pages, page_size):
                 #     linked_title = linked_title.rstrip('|')
                 #     linked_pid = linked_pid.rstrip('|')
 
-                if 'description' in hit['metadata']['oaf:entity']['oaf:result']:
-                    if isinstance(hit['metadata']['oaf:entity']['oaf:result']['description'], list):
-                        abstract = hit['metadata']['oaf:entity']['oaf:result']['description'][0]['$']
-                    else:
-                        abstract = hit['metadata']['oaf:entity']['oaf:result']['description']['$']
-                else:
-                    abstract = ''
 
                 rd = ''
-                # if 'relevantdate' in hit['metadata']['oaf:entity']['oaf:result']:
-                #     for relevant_date in hit['metadata']['oaf:entity']['oaf:result']['relevantdate']:
+                # if 'relevantdate' in result:
+                #     for relevant_date in result['relevantdate']:
                 #         rd += relevant_date['@classname'] + ':' + relevant_date['$'] + ','
                 #     rd = rd.rstrip(',')
 
-                row = [n, title, abstract, publisher, date_of_acceptance, collected_from]
+                row = [n, title, abstract, publisher, date_of_acceptance, collected_from, doi]
                 rows.append(row)
 
                 n += 1
@@ -133,7 +154,7 @@ def get_datasets(pages, page_size):
     return rows
 
 def store(data, filename):
-    heading = ['S.No.', 'Title', 'Abstract', 'Publisher', 'Date of Acceptance', 'Collected From']
+    heading = ['S.No.', 'Title', 'Abstract', 'Publisher', 'Date of Acceptance', 'Collected From', 'DOI']
     with open(filename, 'w') as csvfile:
         csvwriter = csv.writer(csvfile)
         csvwriter.writerow(heading)
