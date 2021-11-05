@@ -21,8 +21,8 @@ The description of some entities is mentioned below.\
 ```Collected From```: a Datasource from which metadata of this instance has been collected (e.g. an aggregator of institutional repositories)\
 ```DOI```: unique and persistent identifier used to identify the result together with the relative identification agency
 
-For more information about the data model, visit the following link.
+For more information about the data model, visit the following link.\
 https://zenodo.org/record/2643199#.YYVP5L1BxQI
 
-For API documentation, visit the link below.
+For API documentation, visit the link below.\
 https://develop.openaire.eu/api.html#datasets
